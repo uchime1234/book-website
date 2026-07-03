@@ -1,33 +1,39 @@
 export interface Book {
   id: string
   title: string
-  filename: string
-  fileSize: number
-  uploadDate: string
-  blobUrl: string // Private blob URL from Vercel Blob
-  coverImageUrl?: string
-  description?: string
+  description: string
+  coverImage: string // Blob URL for the cover image
+  coverImageName?: string // Original filename
+  coverImageSize?: number // File size in bytes
+  downloadLink: string
+  createdAt: string
+  updatedAt?: string
 }
 
 export interface BookFormData {
   title: string
-  file: File
-  description?: string
+  description: string
+  coverImage: File
+  downloadLink: string
+}
+
+export interface UploadResponse {
+  url: string
+  metadata: {
+    filename: string
+    size: number
+    contentType: string
+  }
 }
 
 // For API responses
-export interface UploadResponse {
-  url: string
-  downloadUrl?: string
+export interface ApiResponse<T = any> {
+  success: boolean
+  data?: T
+  error?: string
 }
 
-export interface DownloadResponse {
-  downloadUrl: string
-  filename: string
-}
-
-// For the book detail page with download info
+// For the book detail page
 export interface BookWithDownload extends Book {
-  downloadUrl?: string
   isDownloading?: boolean
 }

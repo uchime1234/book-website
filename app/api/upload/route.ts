@@ -11,16 +11,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const allowedTypes = ['application/pdf', 'application/epub+zip']
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: 'Invalid file type. Only PDF and EPUB files are allowed.' },
+        { error: 'Invalid file type. Only JPEG, PNG, WEBP, and SVG are allowed.' },
         { status: 400 }
       )
     }
 
-    // Validate file size (100MB max)
-    const maxSize = 100 * 1024 * 1024
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024
     if (file.size > maxSize) {
       return NextResponse.json(
         { error: `File too large. Maximum size is ${maxSize / (1024 * 1024)}MB.` },
@@ -28,20 +28,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload to Vercel Blob - PRIVATE access
-    const blob = await put(`books/${Date.now()}_${file.name}`, file, {
-      access: 'private', // 👈 Changed from 'public' to 'private'
+    // Upload to Vercel Blob (metadata will be stored separately)
+    const blob = await put(`covers/${Date.now()}_${file.name}`, file, {
+      access: 'public',
       addRandomSuffix: true,
     })
 
-    // Return the blob URL (this is a private URL that needs signing)
-    return NextResponse.json({ 
+    // Return the blob URL and file metadata
+    return NextResponse.json({
       url: blob.url,
-      downloadUrl: blob.url // This will be used to generate signed URLs
+      filename: file.name,
+      size: file.size,
+      contentType: file.type,
     }, { status: 200 })
 
   } catch (error) {
-    console.error('Blob upload error:', error)
+    console.error('Upload error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }

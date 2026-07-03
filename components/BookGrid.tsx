@@ -2,6 +2,7 @@
 
 import { Book } from '@/lib/types'
 import { BookCard } from './BookCard'
+import { BookOpen } from 'lucide-react'
 
 interface BookGridProps {
   books: Book[]
@@ -13,8 +14,9 @@ export function BookGrid({ books, isEmpty }: BookGridProps) {
     return (
       <div className="flex min-h-96 items-center justify-center rounded-lg border border-dashed border-border bg-card/50">
         <div className="text-center">
+          <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <p className="text-lg font-medium text-card-foreground">No books found</p>
-          <p className="text-sm text-muted-foreground">Try adjusting your search or upload a new book</p>
+          <p className="text-sm text-muted-foreground">Check back later for new additions</p>
         </div>
       </div>
     )
