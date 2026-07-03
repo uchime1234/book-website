@@ -13,13 +13,41 @@ export default function BookDetailPage() {
   const [book, setBook] = useState<any>(null)
   const [copied, setCopied] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
-  const { imageUrl, isLoading: isImageLoading } = useCoverImage(bookId, book?.coverImage || '')
-
+  
+  // Get book data on the client
   useEffect(() => {
     const bookData = getBookById(bookId)
     setBook(bookData)
     setIsMounted(true)
   }, [bookId])
+
+  // Use the cover image hook - only after book is loaded
+  const { imageUrl, isLoading: isImageLoading } = useCoverImage(
+    bookId, 
+    book?.coverImage || ''
+  )
+
+  // DOWNLOAD FUNCTION - Opens external link
+  const handleDownload = () => {
+    console.log('Download link:', book?.downloadLink) // Debug log
+    
+    if (book?.downloadLink) {
+      // Open the link in a new tab/window
+      window.open(book.downloadLink, '_blank')
+    } else {
+      alert('No download link available for this book')
+    }
+  }
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (error) {
+      console.error('Copy error:', error)
+    }
+  }
 
   if (!isMounted) {
     return (
@@ -63,28 +91,6 @@ export default function BookDetailPage() {
         </div>
       </main>
     )
-  }
-
-  // DOWNLOAD FUNCTION - This opens the link in a new tab
-  const handleDownload = () => {
-    console.log('Download link:', book.downloadLink) // Debug log
-    
-    if (book.downloadLink) {
-      // Open the link in a new tab/window
-      window.open(book.downloadLink, '_blank')
-    } else {
-      alert('No download link available for this book')
-    }
-  }
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch (error) {
-      console.error('Copy error:', error)
-    }
   }
 
   return (
