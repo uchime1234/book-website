@@ -65,8 +65,10 @@ export default function BookDetailPage() {
     )
   }
 
-  // This is the key function - it opens the download link
+  // DOWNLOAD FUNCTION - This opens the link in a new tab
   const handleDownload = () => {
+    console.log('Download link:', book.downloadLink) // Debug log
+    
     if (book.downloadLink) {
       // Open the link in a new tab/window
       window.open(book.downloadLink, '_blank')
@@ -183,7 +185,6 @@ export default function BookDetailPage() {
                   <ExternalLink className="h-4 w-4" />
                   Download Link
                 </div>
-                {/* Display the actual download link */}
                 <a
                   href={book.downloadLink}
                   target="_blank"

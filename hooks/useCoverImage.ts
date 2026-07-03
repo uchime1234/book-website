@@ -9,8 +9,8 @@ export function useCoverImage(bookId: string, initialUrl: string) {
 
   useEffect(() => {
     // If it's a local placeholder or already a data URL, use it directly
-    if (initialUrl.startsWith('/') || initialUrl.startsWith('data:')) {
-      setImageUrl(initialUrl)
+    if (!initialUrl || initialUrl.startsWith('/') || initialUrl.startsWith('data:')) {
+      setImageUrl(initialUrl || '/placeholder-book.svg')
       setIsLoading(false)
       return
     }
@@ -20,7 +20,8 @@ export function useCoverImage(bookId: string, initialUrl: string) {
       const fetchSignedUrl = async () => {
         try {
           setIsLoading(true)
-          const response = await fetch(`/api/cover/${bookId}`)
+          // Pass the cover URL as a query parameter
+          const response = await fetch(`/api/cover/${bookId}?url=${encodeURIComponent(initialUrl)}`)
           
           if (!response.ok) {
             throw new Error('Failed to fetch cover image')
@@ -40,6 +41,7 @@ export function useCoverImage(bookId: string, initialUrl: string) {
 
       fetchSignedUrl()
     } else {
+      setImageUrl(initialUrl || '/placeholder-book.svg')
       setIsLoading(false)
     }
   }, [bookId, initialUrl])
