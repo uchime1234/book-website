@@ -28,13 +28,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload to Vercel Blob (metadata will be stored separately)
+    // Upload to Vercel Blob - PRIVATE access
     const blob = await put(`covers/${Date.now()}_${file.name}`, file, {
-      access: 'public',
+      access: 'private', // Changed from 'public' to 'private'
       addRandomSuffix: true,
     })
 
-    // Return the blob URL and file metadata
     return NextResponse.json({
       url: blob.url,
       filename: file.name,
