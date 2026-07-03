@@ -4,37 +4,14 @@ import Link from 'next/link'
 import { Book } from '@/lib/types'
 import { formatDate } from '@/lib/api'
 import { Calendar, ExternalLink } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useCoverImage } from '@/hooks/useCoverImage'
 
 interface BookCardProps {
   book: Book
 }
 
 export function BookCard({ book }: BookCardProps) {
-  const [coverUrl, setCoverUrl] = useState<string>(book.coverImage)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    // If the cover image is from Vercel Blob (starts with a URL pattern)
-    if (book.coverImage.includes('blob.vercel-storage.com')) {
-      const fetchSignedUrl = async () => {
-        try {
-          const response = await fetch(`/api/cover/${book.id}`)
-          if (response.ok) {
-            const data = await response.json()
-            setCoverUrl(data.coverUrl)
-          }
-        } catch (error) {
-          console.error('Failed to fetch signed URL:', error)
-        } finally {
-          setIsLoading(false)
-        }
-      }
-      fetchSignedUrl()
-    } else {
-      setIsLoading(false)
-    }
-  }, [book.id, book.coverImage])
+  const { imageUrl, isLoading } = useCoverImage(book.id, book.coverImage)
 
   return (
     <Link href={`/book/${book.id}`}>
@@ -43,11 +20,11 @@ export function BookCard({ book }: BookCardProps) {
         <div className="relative aspect-[3/4] w-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center bg-muted/20 animate-pulse">
-              <div className="text-muted-foreground">Loading...</div>
+              <div className="text-muted-foreground text-sm">Loading...</div>
             </div>
           ) : (
             <img
-              src={coverUrl}
+              src={imageUrl}
               alt={book.title}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               onError={(e) => {

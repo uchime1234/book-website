@@ -9,7 +9,7 @@ export async function GET(
   try {
     const bookId = params.id
     
-    // Get book from your storage
+    // Get book from storage
     const book = getBookById(bookId)
     
     if (!book) {
@@ -20,10 +20,11 @@ export async function GET(
     }
 
     // Generate a signed URL for the private cover image
+    // This URL will expire in 1 hour by default
     const { url } = await head(book.coverImage)
     
     return NextResponse.json({ 
-      coverUrl: url,
+      url: url,
     }, { status: 200 })
 
   } catch (error) {

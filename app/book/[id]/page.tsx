@@ -4,7 +4,8 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { getBookById, formatDate, formatFileSize } from '@/lib/api'
-import { BookOpen, Download, ArrowLeft, Calendar, ExternalLink, Share2, CheckCircle, Image } from 'lucide-react'
+import { useCoverImage } from '@/hooks/useCoverImage'
+import { BookOpen, Download, ArrowLeft, Calendar, ExternalLink, Share2, CheckCircle } from 'lucide-react'
 
 export default function BookDetailPage() {
   const params = useParams()
@@ -12,6 +13,7 @@ export default function BookDetailPage() {
   const [book, setBook] = useState<any>(null)
   const [copied, setCopied] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const { imageUrl, isLoading: isImageLoading } = useCoverImage(bookId, book?.coverImage || '')
 
   useEffect(() => {
     const bookData = getBookById(bookId)
@@ -63,9 +65,13 @@ export default function BookDetailPage() {
     )
   }
 
+  // This is the key function - it opens the download link
   const handleDownload = () => {
     if (book.downloadLink) {
+      // Open the link in a new tab/window
       window.open(book.downloadLink, '_blank')
+    } else {
+      alert('No download link available for this book')
     }
   }
 
@@ -95,17 +101,23 @@ export default function BookDetailPage() {
           {/* Cover Image */}
           <div className="flex flex-col gap-4">
             <div className="aspect-[3/4] w-full overflow-hidden rounded-xl border border-border bg-gradient-to-br from-primary/20 to-primary/5 shadow-lg">
-              <img
-                src={book.coverImage}
-                alt={book.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/placeholder-book.svg'
-                }}
-              />
+              {isImageLoading ? (
+                <div className="w-full h-full flex items-center justify-center bg-muted/20 animate-pulse">
+                  <div className="text-muted-foreground">Loading cover...</div>
+                </div>
+              ) : (
+                <img
+                  src={imageUrl}
+                  alt={book.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder-book.svg'
+                  }}
+                />
+              )}
             </div>
 
-            {/* Image Metadata (if available) */}
+            {/* Image Metadata */}
             {(book.coverImageName || book.coverImageSize) && (
               <div className="rounded-lg border border-border bg-card/50 p-3">
                 <h4 className="text-xs font-medium text-muted-foreground mb-1">Image Details</h4>
@@ -171,6 +183,7 @@ export default function BookDetailPage() {
                   <ExternalLink className="h-4 w-4" />
                   Download Link
                 </div>
+                {/* Display the actual download link */}
                 <a
                   href={book.downloadLink}
                   target="_blank"
