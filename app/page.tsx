@@ -10,23 +10,33 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isMounted, setIsMounted] = useState(false)
 
+  // Load books - this will run every time the component mounts
   useEffect(() => {
-    setBooks(getBooks())
+    const loadBooks = () => {
+      const allBooks = getBooks()
+      console.log('📚 Books loaded:', allBooks.length)
+      setBooks(allBooks)
+    }
+    
+    loadBooks()
     setIsMounted(true)
   }, [])
 
-  // Add this to your app/page.tsx or a cleanup route
-// This will clear out any existing mock data
-
-useEffect(() => {
-  const books = getBooks()
-  // Check if there are any mock books (you can add logic to detect them)
-  if (books.length > 0) {
-    // Only clear if they match the old mock data pattern
-    // Or just clear all and let admin re-upload
-    localStorage.removeItem('books')
-  }
-}, [])
+  // Refresh books when returning to this page
+  useEffect(() => {
+    if (isMounted) {
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+          const allBooks = getBooks()
+          console.log('📚 Page visible, refreshing books:', allBooks.length)
+          setBooks(allBooks)
+        }
+      }
+      
+      document.addEventListener('visibilitychange', handleVisibilityChange)
+      return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [isMounted])
 
   const filteredBooks = useMemo(() => {
     if (!isMounted) return []
@@ -35,6 +45,13 @@ useEffect(() => {
     }
     return searchBooks(searchQuery)
   }, [searchQuery, books, isMounted])
+
+  // Force refresh function
+  const refreshBooks = () => {
+    const allBooks = getBooks()
+    console.log('🔄 Manual refresh:', allBooks.length)
+    setBooks(allBooks)
+  }
 
   if (!isMounted) {
     return (
@@ -83,6 +100,12 @@ useEffect(() => {
           <p className="text-sm text-muted-foreground">
             {filteredBooks.length} {filteredBooks.length === 1 ? 'book' : 'books'} found
           </p>
+          <button
+            onClick={refreshBooks}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Refresh ↻
+          </button>
         </div>
 
         <BookGrid books={filteredBooks} isEmpty={books.length === 0} />

@@ -19,7 +19,6 @@ export function BookCard({ book }: BookCardProps) {
       try {
         const coverImage = book.coverImage
         
-        // If it's a placeholder or data URL, use it directly
         if (!coverImage || coverImage.startsWith('/') || coverImage.startsWith('data:')) {
           setImageUrl(coverImage || '/placeholder-book.svg')
           setIsLoading(false)

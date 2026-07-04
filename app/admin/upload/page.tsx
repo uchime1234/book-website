@@ -103,9 +103,14 @@ export default function AdminUploadPage() {
       })
       removeImage()
 
+      // Force refresh the library page
       setTimeout(() => {
         router.push('/')
-      }, 2000)
+        // After navigation, force a refresh of the page state
+        setTimeout(() => {
+          window.location.reload()
+        }, 100)
+      }, 1500)
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add book')

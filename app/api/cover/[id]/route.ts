@@ -8,8 +8,6 @@ export async function GET(
     const url = new URL(request.url)
     const coverUrl = url.searchParams.get('url')
     
-    console.log('🖼️ Cover URL requested:', coverUrl)
-    
     if (!coverUrl) {
       return NextResponse.json(
         { error: 'No cover URL provided' },
@@ -18,7 +16,6 @@ export async function GET(
     }
 
     // For public Vercel Blob URLs, return them directly
-    // No signed URL needed since they're public
     return NextResponse.json({ 
       url: coverUrl,
     }, { status: 200 })

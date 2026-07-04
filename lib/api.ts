@@ -6,13 +6,26 @@ import type { Book, BookFormData } from './types'
 const STORAGE_KEY = 'books'
 const ADMIN_SESSION_KEY = 'admin_session'
 
-// Remove DEFAULT_BOOKS - no more mock data!
-// const DEFAULT_BOOKS = [...] // DELETE THIS
-
 // Admin credentials from environment variables
 const ADMIN_CREDENTIALS = {
   username: process.env.NEXT_PUBLIC_ADMIN_USERNAME || 'admin',
   password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123',
+}
+
+// Store listeners for real-time updates
+let listeners: (() => void)[] = []
+
+// Subscribe to book changes
+export function subscribeToBooks(callback: () => void) {
+  listeners.push(callback)
+  return () => {
+    listeners = listeners.filter(listener => listener !== callback)
+  }
+}
+
+// Notify all listeners of changes
+function notifyListeners() {
+  listeners.forEach(listener => listener())
 }
 
 // ============ Book CRUD Operations ============
@@ -20,7 +33,7 @@ const ADMIN_CREDENTIALS = {
 // Get all books - SSR safe
 export function getBooks(): Book[] {
   if (typeof window === 'undefined') {
-    return [] // Return empty array on server
+    return []
   }
   
   try {
@@ -35,7 +48,6 @@ export function getBooks(): Book[] {
     // If parsing fails, return empty array
   }
   
-  // Return empty array if no books found
   return []
 }
 
@@ -44,6 +56,8 @@ function saveBooks(books: Book[]): void {
   if (typeof window === 'undefined') return
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(books))
+    // Notify all listeners that data has changed
+    notifyListeners()
   } catch (error) {
     console.error('Failed to save books:', error)
   }
@@ -205,13 +219,7 @@ export function isValidUrl(string: string): boolean {
   }
 }
 
-// Reset function - clears all books
+// Clear all books
 export function clearAllBooks(): void {
   saveBooks([])
-}
-
-// Optional: Seed function if you want to add test data later
-export function seedTestBooks(): void {
-  // This is empty now - no mock data
-  // You can add test books here if needed for development
 }

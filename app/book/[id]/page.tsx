@@ -32,16 +32,14 @@ export default function BookDetailPage() {
         setIsCoverLoading(true)
         const coverImage = book.coverImage
         
-        // If it's a placeholder or data URL, use it directly
         if (!coverImage || coverImage.startsWith('/') || coverImage.startsWith('data:')) {
           setCoverUrl(coverImage || '/placeholder-book.svg')
           setIsCoverLoading(false)
           return
         }
 
-        // For Vercel Blob URLs, get the public URL
+        // For Vercel Blob URLs with public access, use directly
         if (coverImage.includes('blob.vercel-storage.com')) {
-          // Since we're using public access now, just use the URL directly
           setCoverUrl(coverImage)
         } else {
           setCoverUrl(coverImage)
@@ -57,14 +55,12 @@ export default function BookDetailPage() {
     loadCoverImage()
   }, [book])
 
-  // DOWNLOAD FUNCTION - Fixed to properly open the link
   const handleDownload = () => {
     console.log('🔗 Download button clicked')
     console.log('📚 Book:', book)
     console.log('🔗 Download link:', book?.downloadLink)
     
     if (book?.downloadLink) {
-      // Open in new tab
       window.open(book.downloadLink, '_blank')
     } else {
       alert('No download link available for this book')
