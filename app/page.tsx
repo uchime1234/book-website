@@ -15,6 +15,19 @@ export default function Page() {
     setIsMounted(true)
   }, [])
 
+  // Add this to your app/page.tsx or a cleanup route
+// This will clear out any existing mock data
+
+useEffect(() => {
+  const books = getBooks()
+  // Check if there are any mock books (you can add logic to detect them)
+  if (books.length > 0) {
+    // Only clear if they match the old mock data pattern
+    // Or just clear all and let admin re-upload
+    localStorage.removeItem('books')
+  }
+}, [])
+
   const filteredBooks = useMemo(() => {
     if (!isMounted) return []
     if (!searchQuery.trim()) {

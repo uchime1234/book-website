@@ -6,33 +6,8 @@ import type { Book, BookFormData } from './types'
 const STORAGE_KEY = 'books'
 const ADMIN_SESSION_KEY = 'admin_session'
 
-// Default demo books with placeholder images
-const DEFAULT_BOOKS: Book[] = [
-  {
-    id: '1',
-    title: 'The Great Gatsby',
-    description: 'A classic novel by F. Scott Fitzgerald about the American dream, love, and tragedy in the Jazz Age.',
-    coverImage: '/placeholder-book.svg',
-    downloadLink: 'https://www.gutenberg.org/ebooks/64317',
-    createdAt: new Date('2024-01-15').toISOString(),
-  },
-  {
-    id: '2',
-    title: 'To Kill a Mockingbird',
-    description: 'A gripping tale of racial injustice and childhood innocence set in the American South.',
-    coverImage: '/placeholder-book.svg',
-    downloadLink: 'https://www.gutenberg.org/ebooks/12345',
-    createdAt: new Date('2024-01-20').toISOString(),
-  },
-  {
-    id: '3',
-    title: '1984',
-    description: 'A dystopian novel about totalitarianism, surveillance, and the power of truth.',
-    coverImage: '/placeholder-book.svg',
-    downloadLink: 'https://www.gutenberg.org/ebooks/67890',
-    createdAt: new Date('2024-02-01').toISOString(),
-  },
-]
+// Remove DEFAULT_BOOKS - no more mock data!
+// const DEFAULT_BOOKS = [...] // DELETE THIS
 
 // Admin credentials from environment variables
 const ADMIN_CREDENTIALS = {
@@ -45,7 +20,7 @@ const ADMIN_CREDENTIALS = {
 // Get all books - SSR safe
 export function getBooks(): Book[] {
   if (typeof window === 'undefined') {
-    return DEFAULT_BOOKS
+    return [] // Return empty array on server
   }
   
   try {
@@ -57,12 +32,11 @@ export function getBooks(): Book[] {
       }
     }
   } catch {
-    // If parsing fails, return default books
+    // If parsing fails, return empty array
   }
   
-  // If no stored books, initialize with defaults
-  saveBooks(DEFAULT_BOOKS)
-  return DEFAULT_BOOKS
+  // Return empty array if no books found
+  return []
 }
 
 // Save books to localStorage
@@ -231,10 +205,13 @@ export function isValidUrl(string: string): boolean {
   }
 }
 
-export function resetToDefaultBooks(): void {
-  saveBooks(DEFAULT_BOOKS)
-}
-
+// Reset function - clears all books
 export function clearAllBooks(): void {
   saveBooks([])
+}
+
+// Optional: Seed function if you want to add test data later
+export function seedTestBooks(): void {
+  // This is empty now - no mock data
+  // You can add test books here if needed for development
 }
