@@ -28,9 +28,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Upload to Vercel Blob - PRIVATE access
+    // Upload to Vercel Blob - PUBLIC access
     const blob = await put(`covers/${Date.now()}_${file.name}`, file, {
-      access: 'private',
+      access: 'public',
       addRandomSuffix: true,
     })
 

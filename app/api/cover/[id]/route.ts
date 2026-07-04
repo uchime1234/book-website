@@ -1,4 +1,3 @@
-import { head } from '@vercel/blob'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(
@@ -9,6 +8,8 @@ export async function GET(
     const url = new URL(request.url)
     const coverUrl = url.searchParams.get('url')
     
+    console.log('🖼️ Cover URL requested:', coverUrl)
+    
     if (!coverUrl) {
       return NextResponse.json(
         { error: 'No cover URL provided' },
@@ -16,18 +17,10 @@ export async function GET(
       )
     }
 
-    // If it's a placeholder or data URL, return it directly
-    if (coverUrl.startsWith('/') || coverUrl.startsWith('data:')) {
-      return NextResponse.json({ 
-        url: coverUrl,
-      }, { status: 200 })
-    }
-
-    // Generate a signed URL for the private cover image
-    const { url: signedUrl } = await head(coverUrl)
-    
+    // For public Vercel Blob URLs, return them directly
+    // No signed URL needed since they're public
     return NextResponse.json({ 
-      url: signedUrl,
+      url: coverUrl,
     }, { status: 200 })
 
   } catch (error) {

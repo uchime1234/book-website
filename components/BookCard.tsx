@@ -19,20 +19,16 @@ export function BookCard({ book }: BookCardProps) {
       try {
         const coverImage = book.coverImage
         
+        // If it's a placeholder or data URL, use it directly
         if (!coverImage || coverImage.startsWith('/') || coverImage.startsWith('data:')) {
           setImageUrl(coverImage || '/placeholder-book.svg')
           setIsLoading(false)
           return
         }
 
+        // For Vercel Blob URLs with public access, use directly
         if (coverImage.includes('blob.vercel-storage.com')) {
-          const response = await fetch(`/api/cover/${book.id}?url=${encodeURIComponent(coverImage)}`)
-          if (response.ok) {
-            const data = await response.json()
-            setImageUrl(data.url)
-          } else {
-            setImageUrl('/placeholder-book.svg')
-          }
+          setImageUrl(coverImage)
         } else {
           setImageUrl(coverImage)
         }
@@ -61,6 +57,7 @@ export function BookCard({ book }: BookCardProps) {
               alt={book.title}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               onError={(e) => {
+                console.error('Image failed to load:', imageUrl)
                 e.currentTarget.src = '/placeholder-book.svg'
               }}
             />

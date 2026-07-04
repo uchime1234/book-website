@@ -17,11 +17,13 @@ export default function BookDetailPage() {
 
   useEffect(() => {
     const bookData = getBookById(bookId)
+    console.log('📚 Book data:', bookData)
+    console.log('📚 Download link:', bookData?.downloadLink)
     setBook(bookData)
     setIsMounted(true)
   }, [bookId])
 
-  // Load cover image separately
+  // Load cover image
   useEffect(() => {
     async function loadCoverImage() {
       if (!book) return
@@ -37,15 +39,10 @@ export default function BookDetailPage() {
           return
         }
 
-        // If it's a Vercel Blob URL, fetch a signed URL
+        // For Vercel Blob URLs, get the public URL
         if (coverImage.includes('blob.vercel-storage.com')) {
-          const response = await fetch(`/api/cover/${book.id}?url=${encodeURIComponent(coverImage)}`)
-          if (response.ok) {
-            const data = await response.json()
-            setCoverUrl(data.url)
-          } else {
-            setCoverUrl('/placeholder-book.svg')
-          }
+          // Since we're using public access now, just use the URL directly
+          setCoverUrl(coverImage)
         } else {
           setCoverUrl(coverImage)
         }
@@ -60,9 +57,14 @@ export default function BookDetailPage() {
     loadCoverImage()
   }, [book])
 
+  // DOWNLOAD FUNCTION - Fixed to properly open the link
   const handleDownload = () => {
-    console.log('Download link:', book?.downloadLink)
+    console.log('🔗 Download button clicked')
+    console.log('📚 Book:', book)
+    console.log('🔗 Download link:', book?.downloadLink)
+    
     if (book?.downloadLink) {
+      // Open in new tab
       window.open(book.downloadLink, '_blank')
     } else {
       alert('No download link available for this book')
@@ -146,7 +148,8 @@ export default function BookDetailPage() {
                   alt={book.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder-book.svg'
+                    console.error('Image failed to load:', coverUrl)
+                    e.currentTarget.src = '/placeholder-book.svg'
                   }}
                 />
               )}
