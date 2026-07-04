@@ -4,35 +4,65 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { getBookById, formatDate, formatFileSize } from '@/lib/api'
-import { useCoverImage } from '@/hooks/useCoverImage'
 import { BookOpen, Download, ArrowLeft, Calendar, ExternalLink, Share2, CheckCircle } from 'lucide-react'
 
 export default function BookDetailPage() {
   const params = useParams()
   const bookId = params.id as string
   const [book, setBook] = useState<any>(null)
+  const [coverUrl, setCoverUrl] = useState<string>('/placeholder-book.svg')
+  const [isCoverLoading, setIsCoverLoading] = useState(true)
   const [copied, setCopied] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
-  
-  // Get book data on the client
+
   useEffect(() => {
     const bookData = getBookById(bookId)
     setBook(bookData)
     setIsMounted(true)
   }, [bookId])
 
-  // Use the cover image hook - only after book is loaded
-  const { imageUrl, isLoading: isImageLoading } = useCoverImage(
-    bookId, 
-    book?.coverImage || ''
-  )
+  // Load cover image separately
+  useEffect(() => {
+    async function loadCoverImage() {
+      if (!book) return
+      
+      try {
+        setIsCoverLoading(true)
+        const coverImage = book.coverImage
+        
+        // If it's a placeholder or data URL, use it directly
+        if (!coverImage || coverImage.startsWith('/') || coverImage.startsWith('data:')) {
+          setCoverUrl(coverImage || '/placeholder-book.svg')
+          setIsCoverLoading(false)
+          return
+        }
 
-  // DOWNLOAD FUNCTION - Opens external link
+        // If it's a Vercel Blob URL, fetch a signed URL
+        if (coverImage.includes('blob.vercel-storage.com')) {
+          const response = await fetch(`/api/cover/${book.id}?url=${encodeURIComponent(coverImage)}`)
+          if (response.ok) {
+            const data = await response.json()
+            setCoverUrl(data.url)
+          } else {
+            setCoverUrl('/placeholder-book.svg')
+          }
+        } else {
+          setCoverUrl(coverImage)
+        }
+      } catch (error) {
+        console.error('Failed to load cover image:', error)
+        setCoverUrl('/placeholder-book.svg')
+      } finally {
+        setIsCoverLoading(false)
+      }
+    }
+
+    loadCoverImage()
+  }, [book])
+
   const handleDownload = () => {
-    console.log('Download link:', book?.downloadLink) // Debug log
-    
+    console.log('Download link:', book?.downloadLink)
     if (book?.downloadLink) {
-      // Open the link in a new tab/window
       window.open(book.downloadLink, '_blank')
     } else {
       alert('No download link available for this book')
@@ -80,7 +110,6 @@ export default function BookDetailPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to Library
           </Link>
-
           <div className="flex min-h-96 items-center justify-center rounded-lg border border-dashed border-border">
             <div className="text-center">
               <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -96,7 +125,6 @@ export default function BookDetailPage() {
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Back Button */}
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors mb-8"
@@ -106,16 +134,15 @@ export default function BookDetailPage() {
         </Link>
 
         <div className="grid gap-8 md:grid-cols-[320px,1fr] lg:gap-12">
-          {/* Cover Image */}
           <div className="flex flex-col gap-4">
             <div className="aspect-[3/4] w-full overflow-hidden rounded-xl border border-border bg-gradient-to-br from-primary/20 to-primary/5 shadow-lg">
-              {isImageLoading ? (
+              {isCoverLoading ? (
                 <div className="w-full h-full flex items-center justify-center bg-muted/20 animate-pulse">
                   <div className="text-muted-foreground">Loading cover...</div>
                 </div>
               ) : (
                 <img
-                  src={imageUrl}
+                  src={coverUrl}
                   alt={book.title}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -125,22 +152,16 @@ export default function BookDetailPage() {
               )}
             </div>
 
-            {/* Image Metadata */}
             {(book.coverImageName || book.coverImageSize) && (
               <div className="rounded-lg border border-border bg-card/50 p-3">
                 <h4 className="text-xs font-medium text-muted-foreground mb-1">Image Details</h4>
                 <div className="space-y-1 text-xs text-muted-foreground">
-                  {book.coverImageName && (
-                    <p>File: {book.coverImageName}</p>
-                  )}
-                  {book.coverImageSize && (
-                    <p>Size: {formatFileSize(book.coverImageSize)}</p>
-                  )}
+                  {book.coverImageName && <p>File: {book.coverImageName}</p>}
+                  {book.coverImageSize && <p>Size: {formatFileSize(book.coverImageSize)}</p>}
                 </div>
               </div>
             )}
 
-            {/* Quick Actions */}
             <div className="space-y-3">
               <button
                 onClick={handleDownload}
@@ -170,7 +191,6 @@ export default function BookDetailPage() {
             </div>
           </div>
 
-          {/* Book Details */}
           <div className="space-y-8">
             <div>
               <h1 className="text-4xl font-bold text-foreground mb-4">{book.title}</h1>

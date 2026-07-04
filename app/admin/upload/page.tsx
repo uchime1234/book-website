@@ -21,7 +21,6 @@ export default function AdminUploadPage() {
     downloadLink: '',
   })
 
-  // Check admin authentication
   useEffect(() => {
     if (!isAdminAuthenticated()) {
       router.push('/admin/login')
@@ -31,14 +30,12 @@ export default function AdminUploadPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Validate file type
       const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml']
       if (!validTypes.includes(file.type)) {
         setError('Please upload a valid image (JPEG, PNG, WEBP, or SVG)')
         return
       }
       
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         setError('Image size must be less than 5MB')
         return
@@ -46,7 +43,6 @@ export default function AdminUploadPage() {
       
       setImageFile(file)
       
-      // Create preview
       const reader = new FileReader()
       reader.onload = (e) => {
         setImagePreview(e.target?.result as string)
@@ -71,7 +67,6 @@ export default function AdminUploadPage() {
     setIsLoading(true)
 
     try {
-      // Validate form
       if (!formData.title.trim()) {
         throw new Error('Title is required')
       }
@@ -85,14 +80,12 @@ export default function AdminUploadPage() {
         throw new Error('Download link is required')
       }
 
-      // Validate download link URL
       try {
         new URL(formData.downloadLink)
       } catch {
         throw new Error('Please enter a valid download link URL')
       }
 
-      // Create book data with image file
       const bookData: BookFormData = {
         title: formData.title.trim(),
         description: formData.description.trim(),
@@ -100,7 +93,6 @@ export default function AdminUploadPage() {
         downloadLink: formData.downloadLink.trim(),
       }
 
-      // Add book with image upload to Vercel Blob
       await addBook(bookData)
 
       setSuccess(true)
@@ -111,7 +103,6 @@ export default function AdminUploadPage() {
       })
       removeImage()
 
-      // Redirect after 2 seconds
       setTimeout(() => {
         router.push('/')
       }, 2000)
@@ -126,7 +117,6 @@ export default function AdminUploadPage() {
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Add New Book</h1>
@@ -143,7 +133,6 @@ export default function AdminUploadPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
               Book Title *
@@ -158,13 +147,11 @@ export default function AdminUploadPage() {
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Enter the book title"
                 required
-                aria-label="Book title"
                 className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
               />
             </div>
           </div>
 
-          {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-foreground mb-2">
               Description *
@@ -177,18 +164,15 @@ export default function AdminUploadPage() {
               placeholder="Enter a description for the book"
               required
               rows={4}
-              aria-label="Book description"
               className="w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"
             />
           </div>
 
-          {/* Cover Image Upload */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
               Cover Image *
             </label>
             <div className="flex items-start gap-6">
-              {/* Upload Area */}
               <div className="flex-1">
                 <div 
                   className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-all ${
@@ -204,7 +188,6 @@ export default function AdminUploadPage() {
                     onChange={handleImageChange}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     disabled={isLoading}
-                    aria-label="Upload cover image"
                   />
                   <Image className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
                   <p className="text-sm text-muted-foreground">
@@ -221,7 +204,6 @@ export default function AdminUploadPage() {
                 </div>
               </div>
 
-              {/* Preview */}
               <div className="w-32 flex-shrink-0">
                 {imagePreview ? (
                   <div className="relative">
@@ -234,7 +216,6 @@ export default function AdminUploadPage() {
                       type="button"
                       onClick={removeImage}
                       className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors"
-                      aria-label="Remove image"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -250,7 +231,6 @@ export default function AdminUploadPage() {
             </div>
           </div>
 
-          {/* Download Link */}
           <div>
             <label htmlFor="downloadLink" className="block text-sm font-medium text-foreground mb-2">
               Download Link *
@@ -265,7 +245,6 @@ export default function AdminUploadPage() {
                 onChange={(e) => setFormData({ ...formData, downloadLink: e.target.value })}
                 placeholder="https://example.com/book-download"
                 required
-                aria-label="Download link URL"
                 className="w-full rounded-lg border border-border bg-background pl-10 pr-4 py-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
               />
             </div>
@@ -274,7 +253,6 @@ export default function AdminUploadPage() {
             </p>
           </div>
 
-          {/* Preview Section */}
           {formData.title && formData.description && imagePreview && (
             <div className="rounded-lg border border-border bg-card p-6">
               <h3 className="text-sm font-medium text-foreground mb-4">Preview</h3>
@@ -304,7 +282,6 @@ export default function AdminUploadPage() {
             </div>
           )}
 
-          {/* Error Message */}
           {error && (
             <div className="flex items-start gap-3 rounded-lg border border-destructive/50 bg-destructive/10 p-4">
               <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
@@ -315,7 +292,6 @@ export default function AdminUploadPage() {
             </div>
           )}
 
-          {/* Success Message */}
           {success && (
             <div className="flex items-start gap-3 rounded-lg border border-green-600/50 bg-green-50 p-4 dark:bg-green-900/20">
               <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -330,7 +306,6 @@ export default function AdminUploadPage() {
             </div>
           )}
 
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={isLoading || success}

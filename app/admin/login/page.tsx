@@ -17,7 +17,6 @@ export default function AdminLoginPage() {
     setError('')
     setIsLoading(true)
 
-    // Simulate async login
     await new Promise(resolve => setTimeout(resolve, 500))
 
     const success = loginAdmin(username, password)
@@ -29,13 +28,10 @@ export default function AdminLoginPage() {
     setIsLoading(false)
   }
 
-  const adminUsername = getAdminUsername()
-
   return (
     <main className="min-h-screen bg-gradient-to-br from-background to-primary/5 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-card rounded-2xl shadow-xl border border-border p-8">
-          {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
               <BookOpen className="h-8 w-8 text-primary" />
@@ -44,7 +40,6 @@ export default function AdminLoginPage() {
             <p className="text-sm text-muted-foreground mt-1">Access the book management dashboard</p>
           </div>
 
-          {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-foreground mb-2">

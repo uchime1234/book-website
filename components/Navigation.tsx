@@ -23,7 +23,6 @@ export function Navigation() {
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path)
 
-  // Don't show navigation on admin login page
   if (pathname === '/admin/login') return null
 
   return (

@@ -196,14 +196,12 @@ export function isAdminAuthenticated(): boolean {
   return localStorage.getItem(ADMIN_SESSION_KEY) === 'true'
 }
 
-// Get current admin username (for display purposes)
 export function getAdminUsername(): string {
   return ADMIN_CREDENTIALS.username
 }
 
 // ============ Utility Functions ============
 
-// Format date
 export function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -212,7 +210,6 @@ export function formatDate(dateString: string): string {
   })
 }
 
-// Format file size
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes'
   const k = 1024
@@ -221,12 +218,10 @@ export function formatFileSize(bytes: number): string {
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
 }
 
-// Get book count
 export function getBookCount(): number {
   return getBooks().length
 }
 
-// Validate URL
 export function isValidUrl(string: string): boolean {
   try {
     new URL(string)
@@ -236,12 +231,10 @@ export function isValidUrl(string: string): boolean {
   }
 }
 
-// Reset to default books (useful for testing)
 export function resetToDefaultBooks(): void {
   saveBooks(DEFAULT_BOOKS)
 }
 
-// Clear all books
 export function clearAllBooks(): void {
   saveBooks([])
 }

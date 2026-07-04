@@ -4,19 +4,52 @@ import Link from 'next/link'
 import { Book } from '@/lib/types'
 import { formatDate } from '@/lib/api'
 import { Calendar, ExternalLink } from 'lucide-react'
-import { useCoverImage } from '@/hooks/useCoverImage'
+import { useState, useEffect } from 'react'
 
 interface BookCardProps {
   book: Book
 }
 
 export function BookCard({ book }: BookCardProps) {
-  const { imageUrl, isLoading } = useCoverImage(book.id, book.coverImage)
+  const [imageUrl, setImageUrl] = useState<string>('/placeholder-book.svg')
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadImage() {
+      try {
+        const coverImage = book.coverImage
+        
+        if (!coverImage || coverImage.startsWith('/') || coverImage.startsWith('data:')) {
+          setImageUrl(coverImage || '/placeholder-book.svg')
+          setIsLoading(false)
+          return
+        }
+
+        if (coverImage.includes('blob.vercel-storage.com')) {
+          const response = await fetch(`/api/cover/${book.id}?url=${encodeURIComponent(coverImage)}`)
+          if (response.ok) {
+            const data = await response.json()
+            setImageUrl(data.url)
+          } else {
+            setImageUrl('/placeholder-book.svg')
+          }
+        } else {
+          setImageUrl(coverImage)
+        }
+      } catch (error) {
+        console.error('Failed to load image:', error)
+        setImageUrl('/placeholder-book.svg')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadImage()
+  }, [book.id, book.coverImage])
 
   return (
     <Link href={`/book/${book.id}`}>
       <div className="group relative overflow-hidden rounded-lg border border-border bg-card transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 animate-scale-in">
-        {/* Cover Image */}
         <div className="relative aspect-[3/4] w-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
           {isLoading ? (
             <div className="w-full h-full flex items-center justify-center bg-muted/20 animate-pulse">
@@ -28,14 +61,13 @@ export function BookCard({ book }: BookCardProps) {
               alt={book.title}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = '/placeholder-book.svg'
+                e.currentTarget.src = '/placeholder-book.svg'
               }}
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         </div>
 
-        {/* Book Info */}
         <div className="space-y-3 p-4">
           <h3 className="line-clamp-2 text-lg font-semibold leading-tight text-card-foreground group-hover:text-primary transition-colors">
             {book.title}

@@ -6,7 +6,6 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Get the cover URL from the query parameters
     const url = new URL(request.url)
     const coverUrl = url.searchParams.get('url')
     
@@ -15,6 +14,13 @@ export async function GET(
         { error: 'No cover URL provided' },
         { status: 400 }
       )
+    }
+
+    // If it's a placeholder or data URL, return it directly
+    if (coverUrl.startsWith('/') || coverUrl.startsWith('data:')) {
+      return NextResponse.json({ 
+        url: coverUrl,
+      }, { status: 200 })
     }
 
     // Generate a signed URL for the private cover image

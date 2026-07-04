@@ -4,14 +4,12 @@ import { useState, useMemo, useEffect } from 'react'
 import { getBooks, searchBooks } from '@/lib/api'
 import { SearchBar } from '@/components/SearchBar'
 import { BookGrid } from '@/components/BookGrid'
-import { isAdminAuthenticated } from '@/lib/api'
 
 export default function Page() {
   const [books, setBooks] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [isMounted, setIsMounted] = useState(false)
 
-  // Load books only on the client
   useEffect(() => {
     setBooks(getBooks())
     setIsMounted(true)
@@ -25,7 +23,6 @@ export default function Page() {
     return searchBooks(searchQuery)
   }, [searchQuery, books, isMounted])
 
-  // Show loading or empty state during hydration
   if (!isMounted) {
     return (
       <main className="min-h-screen bg-background">
